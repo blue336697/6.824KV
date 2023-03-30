@@ -1,9 +1,7 @@
 package main
 
 //
-// a MapReduce pseudo-application that sometimes crashes,
-// and sometimes takes a long time,
-// to test MapReduce's ability to recover.
+// 一个 MapReduce 伪应用程序，有时会崩溃，有时需要很长时间才能评估 MapReduce 恢复的能力。
 //
 // go build -buildmode=plugin crash.go
 //
