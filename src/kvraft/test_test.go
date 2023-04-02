@@ -387,7 +387,7 @@ func GenericTest(t *testing.T, part string, nclients int, nservers int, unreliab
 	cfg.end()
 }
 
-// Check that ops are committed fast enough, better than 1 per heartbeat interval
+// 检查操作提交速度是否足够快，每个检测信号间隔是否优于 1 个
 func GenericTestSpeed(t *testing.T, part string, maxraftstate int) {
 	const nservers = 3
 	const numOps = 1000
@@ -591,12 +591,10 @@ func TestPersistPartitionUnreliableLinearizable3A(t *testing.T) {
 	GenericTest(t, "3A", 15, 7, true, true, true, -1, true)
 }
 
-//
 // if one server falls behind, then rejoins, does it
 // recover by using the InstallSnapshot RPC?
 // also checks that majority discards committed log entries
 // even if minority doesn't respond.
-//
 func TestSnapshotRPC3B(t *testing.T) {
 	const nservers = 3
 	maxraftstate := 1000

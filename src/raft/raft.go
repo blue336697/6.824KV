@@ -28,19 +28,10 @@ import (
 //
 // ApplyMsg
 //
-//	each time a new entry is committed to the log, each Raft peer
-//	should send an ApplyMsg to the service (or tester)
-//	in the same server.
-//
-// as each Raft peer becomes aware that successive log entries are
-// committed, the peer should send an ApplyMsg to the service (or
-// tester) on the same server, via the applyCh passed to Make(). set
-// CommandValid to true to indicate that the ApplyMsg contains a newly
-// committed log entry.
-//
-// in part 2D you'll want to send other kinds of messages (e.g.,
-// snapshots) on the applyCh, but set CommandValid to false for these
-// other uses.
+//	每次将新条目提交到日志时，每个 Raft 对等方都应向同一服务器中的服务（或测试人员）发送 ApplyMsg。
+//	当每个 Raft 对等体意识到连续的日志条目被提交时，对等方应通过传递给 Make（） 的 applyCh 向同一服务器上的服务（或测试器）发送 ApplyMsg。
+//	将“命令有效”设置为 true 以指示 ApplyMsg 包含新提交的日志条目。
+//	在 2D 部分中，您需要在 applyCh 上发送其他类型的消息（例如快照），但对于这些其他用途，请将 CommandValid 设置为 false。
 type ApplyMsg struct {
 	CommandValid bool
 	Command      interface{}
@@ -65,12 +56,12 @@ type AppendEntriesState int
 const (
 
 	// MoreVoteTime MinVoteTime 定义随机生成投票过期时间范围:(MoreVoteTime+MinVoteTime~MinVoteTime)
-	MoreVoteTime = 200
-	MinVoteTime  = 150
+	MoreVoteTime = 100
+	MinVoteTime  = 75
 
 	// HeartbeatSleep 心脏休眠时间,要注意的是，这个时间要比选举低，才能建立稳定心跳机制
-	HeartbeatSleep = 120
-	AppliedSleep   = 30
+	HeartbeatSleep = 35
+	AppliedSleep   = 15
 )
 
 // 枚举节点的类型：跟随者、竞选者、领导者
@@ -225,11 +216,11 @@ func (rf *Raft) electionTicker() {
 	for rf.killed() == false {
 		nowTime := time.Now()
 		time.Sleep(time.Duration(generateOverTime(int64(rf.me))) * time.Millisecond)
-		rf.mu.Lock()
 
 		// 时间过期发起选举
 		// 此处的流程为每次每次votedTimer如果小于在sleep睡眠之前定义的时间，就代表没有votedTimer没被更新为最新的时间，则发起选举
 		if rf.votedTimer.Before(nowTime) && rf.status != Leader {
+			rf.mu.Lock()
 			// 转变状态，将票投给自己
 			rf.status = Candidate
 			rf.votedFor = rf.me
@@ -240,8 +231,8 @@ func (rf *Raft) electionTicker() {
 			rf.sendElection()
 			rf.votedTimer = time.Now()
 
+			rf.mu.Unlock()
 		}
-		rf.mu.Unlock()
 	}
 }
 
@@ -586,10 +577,9 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 }
 
 /*--------------------------------------日志快照RPC--------------------------------------*/
-// the service says it has created a snapshot that has
-// all info up to and including index. this means the
-// service no longer needs the log through (and including)
-// that index. Raft should now trim its log as much as possible.
+// 该服务表示，它已经创建了一个快照，其中包含所有信息，包括索引。
+//这意味着服务不再需要通过（包括）该索引进行日志。Raft 现在应该尽可能修剪其日志。
+
 // index代表是快照apply应用的index,即在快照中最高的日志条目的下标
 // 而snapshot代表的是上层service传来的快照字节流，包括了Index之前的数据
 // 这个函数的目的是把安装到快照里的日志抛弃，并安装快照数据，同时更新快照下标，属于peers自身主动更新，与leader发送快照不冲突
@@ -731,12 +721,10 @@ func (rf *Raft) InstallSnapShot(args *InstallSnapshotArgs, reply *InstallSnapsho
 
 }
 
-// A service wants to switch to snapshot.  Only do so if Raft hasn't
-// have more recent info since it communicate the snapshot on applyCh.
+// 服务想要切换到快照。仅当 Raft 没有更新的信息时，才这样做，因为它在 applyCh 上传达快照。
 func (rf *Raft) CondInstallSnapshot(lastIncludedTerm int, lastIncludedIndex int, snapshot []byte) bool {
 
 	// Your code here (2D).
-
 	return true
 }
 
