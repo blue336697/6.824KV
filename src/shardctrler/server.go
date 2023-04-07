@@ -176,6 +176,7 @@ func (sc *ShardCtrler) Query(args *QueryArgs, reply *QueryReply) {
 	select {
 	case replyOp := <-ch:
 		if replyOp.SeqId == op.SeqId && replyOp.ClientId == op.ClientId {
+			sc.mu.Lock()
 			reply.Err = OK
 			sc.seqMap[op.ClientId] = op.SeqId
 			//如果查询的结果根本不存在，那么就返回最新的配置
@@ -184,6 +185,7 @@ func (sc *ShardCtrler) Query(args *QueryArgs, reply *QueryReply) {
 			} else { //如果查询的结果存在，那么就返回查询的结果
 				reply.Config = sc.configs[op.QueryNum]
 			}
+			sc.mu.Unlock()
 		} else {
 			reply.Err = ErrWrongLeader
 		}

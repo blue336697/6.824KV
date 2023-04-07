@@ -22,7 +22,7 @@ const NShards = 10
 
 // 配置 -- 将分片分配给组。请不要更改此设置。
 type Config struct {
-	Num    int              // config number
+	Num    int              // 配置编号，可以理解为这个配置到第几个版本了
 	Shards [NShards]int     // shard -> gid
 	Groups map[int][]string // gid -> servers[]
 }

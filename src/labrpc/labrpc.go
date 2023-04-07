@@ -73,7 +73,7 @@ type replyMsg struct {
 }
 
 type ClientEnd struct {
-	endname interface{}   // this end-point's name
+	endname interface{}   // 此端点的名称
 	ch      chan reqMsg   // copy of Network.endCh
 	done    chan struct{} // closed when Network is cleaned up
 }
@@ -379,11 +379,9 @@ func (rn *Network) GetTotalBytes() int64 {
 	return x
 }
 
-//
 // a server is a collection of services, all sharing
 // the same rpc dispatcher. so that e.g. both a Raft
 // and a k/v server can listen to the same rpc endpoint.
-//
 type Server struct {
 	mu       sync.Mutex
 	services map[string]*Service
